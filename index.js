@@ -6,7 +6,12 @@ import mongoose from "mongoose";
 import "dotenv/config";
 
 const main = async () => {
-  mongoose.connect(process.env.MONGO);
+  try {
+    await mongoose.connect(process.env.MONGO);
+    console.log("mongoose connected.");
+  } catch (err) {
+    console.error(err);
+  }
 
   // The ApolloServer constructor requires two parameters: your schema
   // definition and your set of resolvers.
