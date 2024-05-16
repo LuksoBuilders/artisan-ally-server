@@ -10,7 +10,7 @@ export const getUser = async (id) => {
   if (cachedUser && cachedUser.validTill > new Date()) {
     return cachedUser.data;
   } else {
-    const { user } = await request({
+    const { user: userData } = await request({
       url: GRAPHQL_SERVER_ADDRESS,
       document: gql`
         query user($id: ID!) {
@@ -37,7 +37,11 @@ export const getUser = async (id) => {
     var validTill = new Date();
     validTill.setSeconds(validTill.getSeconds() + 3);
 
+    const user = userData ? userData : { id, backerBucks: [] };
+
     const verifiableURI = await getUserVerifiableURI(id);
+
+    console.log("here", verifiableURI);
 
     userCache.set(id, { data: { verifiableURI, ...user }, validTill });
 

@@ -22,8 +22,6 @@ export const getUserVerifiableURI = async (userAddress) => {
 
     const data = await UPContract.getData(profileKey);
 
-    console.log(data);
-
     var validTill = new Date();
     validTill.setMinutes(validTill.getMinutes() + 10);
 
