@@ -3,9 +3,10 @@ import { startStandaloneServer } from "@apollo/server/standalone";
 import { typeDefs } from "./src/typeDefs.js";
 import { resolvers } from "./src/resolvers.js";
 import mongoose from "mongoose";
+import "dotenv/config";
 
 const main = async () => {
-  mongoose.connect("mongodb://127.0.0.1:27017/artisan-ally");
+  mongoose.connect(process.env.MONGO);
 
   // The ApolloServer constructor requires two parameters: your schema
   // definition and your set of resolvers.
