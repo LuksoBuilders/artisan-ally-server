@@ -125,7 +125,7 @@ export const resolvers = {
       return (await getUser(id)).id;
     },
     profile: async ({ id }) => {
-      console.log("from profile resolver", await getUser(id));
+      console.log("from profile resolver");
 
       const lsp3Metadata = await getLSP3Profile(
         (
