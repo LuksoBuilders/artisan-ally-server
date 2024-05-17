@@ -54,7 +54,10 @@ export const getLSP4Fellowship = async (verifiableURI) => {
     if (!existedMetadata) {
       const { decodedUrl } = parseVerifiableURI(verifiableURI);
       const result = await axios.get(
-        decodedUrl.replace("ipfs://", "https://ipfs.io/ipfs/")
+        decodedUrl.replace(
+          "ipfs://",
+          "https://gateway.lighthouse.storage/ipfs/"
+        )
       );
 
       const lsp4Metadata = new LSP4Fellowship({
