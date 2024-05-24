@@ -20,6 +20,27 @@ export const resolvers = {
       };
     },
 
+    users: async () => {
+      try {
+        const targetUsers = (
+          await request({
+            url: GRAPHQL_SERVER_ADDRESS,
+            document: gql`
+              query users {
+                users {
+                  id
+                }
+              }
+            `,
+          })
+        ).users;
+
+        return targetUsers;
+      } catch (err) {
+        console.error(err);
+      }
+    },
+
     userDeities: async (_, { userAddress }) => {
       try {
         const targetDeities = (
@@ -121,6 +142,26 @@ export const resolvers = {
       }
     },
 
+    deities: async (_, {}) => {
+      try {
+        const targetDeities = (
+          await request({
+            url: GRAPHQL_SERVER_ADDRESS,
+            document: gql`
+              query {
+                deities {
+                  id
+                }
+              }
+            `,
+          })
+        ).deities;
+        return targetDeities;
+      } catch (err) {
+        console.error(err);
+      }
+    },
+
     deity: async (_, { deityId }) => {
       return {
         id: deityId,
@@ -143,6 +184,12 @@ export const resolvers = {
     },
     backerBucks: async ({ id }) => {
       return (await getUser(id)).backerBucks;
+    },
+    fellowships: async ({ id }) => {
+      return (await getUser(id)).fellowships;
+    },
+    deities: async ({ id }) => {
+      return (await getUser(id)).deities;
     },
   },
 

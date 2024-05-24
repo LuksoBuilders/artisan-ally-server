@@ -161,7 +161,9 @@ export const typeDefs = `#graphql
 
     type Query {
         user(userAddress: String!): User!
+        users: [User!]!
         deity(deityId: String!): Deity!
+        deities: [Deity!]!
         userDeities(userAddress: String!): [Deity!]!
         userFellowships(userAddress: String!): [Fellowship!]!
         fellowship(id: String!): Fellowship

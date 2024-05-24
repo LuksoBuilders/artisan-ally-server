@@ -26,6 +26,12 @@ export const getUser = async (id) => {
               }
               amount
             }
+            fellowships {
+              id
+            }
+            deities {
+              id
+            }
           }
         }
       `,
