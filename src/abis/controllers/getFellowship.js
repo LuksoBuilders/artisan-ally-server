@@ -33,6 +33,10 @@ export const getFellowship = async (id) => {
             }
             backerBucks {
               id
+              amount
+              owner {
+                id
+              }
             }
             contributionAddress
             contributions {

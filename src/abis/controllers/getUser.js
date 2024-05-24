@@ -41,10 +41,10 @@ export const getUser = async (id) => {
 
     const verifiableURI = await getUserVerifiableURI(id);
 
-    console.log("here", verifiableURI);
+    //console.log("here", verifiableURI);
 
     userCache.set(id, { data: { verifiableURI, ...user }, validTill });
 
-    return user;
+    return { verifiableURI, ...user };
   }
 };

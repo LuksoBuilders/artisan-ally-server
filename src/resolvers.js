@@ -10,6 +10,8 @@ import { getDeity } from "./abis/controllers/getDeity.js";
 import { getFellowship } from "./abis/controllers/getFellowship.js";
 import { getUser } from "./abis/controllers/getUser.js";
 
+import { ethers } from "ethers";
+
 export const resolvers = {
   Query: {
     user: async (_, { userAddress }) => {
@@ -118,6 +120,12 @@ export const resolvers = {
         console.error(err);
       }
     },
+
+    deity: async (_, { deityId }) => {
+      return {
+        id: deityId,
+      };
+    },
   },
 
   User: {
@@ -125,15 +133,11 @@ export const resolvers = {
       return (await getUser(id)).id;
     },
     profile: async ({ id }) => {
-      console.log("from profile resolver");
-
       const lsp3Metadata = await getLSP3Profile(
         (
           await getUser(id)
         ).verifiableURI
       );
-
-      console.log("now here", lsp3Metadata);
 
       return lsp3Metadata;
     },
@@ -160,13 +164,36 @@ export const resolvers = {
       return (await getDeity(id)).level;
     },
     xp: async ({ id }) => {
-      return (await getDeity(id)).xp;
+      const rawXp = (await getDeity(id)).xp;
+      return Number(ethers.utils.formatUnits(rawXp, 15)).toFixed(0);
     },
     owner: async ({ id }) => {
       return (await getDeity(id)).owner;
     },
     withdrawable: async ({ id }) => {
-      return (await getDeity(id)).withdrawable;
+      const deity = await getDeity(id);
+
+      const getDeityFeePercent = () => {
+        switch (deity.tier) {
+          case "S":
+            return 100;
+          case "A":
+            return 75;
+          case "B":
+            return 50;
+          case "C":
+            return 25;
+        }
+      };
+
+      const directFee = ethers.BigNumber.from(deity.directFee);
+      const passiveFee = ethers.BigNumber.from(
+        deity.systemFeeAtomCollected.amount
+      ).mul(getDeityFeePercent());
+
+      const harvested = ethers.BigNumber.from(deity.harvested);
+
+      return directFee.add(passiveFee).sub(harvested).toString();
     },
     slots: async ({ id }) => {
       return (await getDeity(id)).slots;
@@ -193,8 +220,13 @@ export const resolvers = {
       return (await getFellowship(id)).metadata;
     },
     info: async ({ id }) => {
-      if (!(await getFellowship(id)).metadata) return null;
-      return await getLSP4Fellowship((await getFellowship(id)).metadata);
+      try {
+        if (!(await getFellowship(id)).metadata) return null;
+        return await getLSP4Fellowship((await getFellowship(id)).metadata);
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
     },
     contributionAddress: async ({ id }) => {
       return (await getFellowship(id)).contributionAddress;

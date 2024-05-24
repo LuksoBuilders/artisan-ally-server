@@ -50,16 +50,12 @@ const LSP3ProfileSchema = new Schema({
 const LSP3Profile = mongoose.model("LSP3Profile", LSP3ProfileSchema);
 
 export const getLSP3Profile = async (verifiableURI) => {
-  console.log("getting LSP3 Profile", verifiableURI);
-
   try {
     if (!verifiableURI) {
       return {};
     }
 
     const existedMetadata = await LSP3Profile.findOne({ verifiableURI });
-
-    console.log("existed metadata: ", existedMetadata);
 
     if (!existedMetadata) {
       const { decodedUrl } = parseVerifiableURI(verifiableURI);

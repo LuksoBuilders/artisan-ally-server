@@ -12,6 +12,7 @@ export const getUserVerifiableURI = async (userAddress) => {
   const cachedVURI = userVURICache.get(userAddress);
 
   if (cachedVURI && cachedVURI.validTill > new Date()) {
+    console.log("loading from cache");
     return cachedVURI.data;
   } else {
     const UPContract = new ethers.Contract(

@@ -19,10 +19,16 @@ export const getDeity = async (id) => {
             metadata
             xp
             level
+            systemFeeAtomCollected {
+              id
+              amount
+            }
             owner {
               id
             }
             withdrawable
+            directFee
+            harvested
             tier
             slots {
               id

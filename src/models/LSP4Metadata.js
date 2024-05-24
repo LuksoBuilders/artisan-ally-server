@@ -56,11 +56,6 @@ export const getLSP4Metadata = async (verifiableURI) => {
         decodedUrl.replace("ipfs://", "https://ipfs.io/ipfs/")
       );
 
-      console.log({
-        verifiableURI,
-        ...result.data.LSP4Metadata,
-      });
-
       const lsp4Metadata = new LSP4Metadata({
         verifiableURI,
         ...result.data.LSP4Metadata,
