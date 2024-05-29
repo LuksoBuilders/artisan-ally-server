@@ -26,7 +26,7 @@ export const resolvers = {
           await request({
             url: GRAPHQL_SERVER_ADDRESS,
             document: gql`
-              query users {
+              query users(first: 1000) {
                 users {
                   id
                 }
