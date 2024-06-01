@@ -114,6 +114,7 @@ export const typeDefs = `#graphql
       endorsements: [Endorsement!]!
       founder: Deity!
       artisan: User!
+      raisedAmount: String!
     }
     
     type Deity  {
@@ -159,7 +160,13 @@ export const typeDefs = `#graphql
       usedAt: String!
     }
 
+    type GlobalVars {
+      totalFeeCollected: String!
+      totalRaisedAmount: String!
+    }
+
     type Query {
+        globalVars: GlobalVars!
         user(userAddress: String!): User!
         users: [User!]!
         deity(deityId: String!): Deity!

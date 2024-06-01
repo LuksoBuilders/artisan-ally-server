@@ -14,6 +14,28 @@ import { ethers } from "ethers";
 
 export const resolvers = {
   Query: {
+    globalVars: async (_) => {
+      try {
+        const globalV = (
+          await request({
+            url: GRAPHQL_SERVER_ADDRESS,
+            document: gql`
+              query users {
+                globalVars(id: "0x00000000") {
+                  totalFeeCollected
+                  totalRaisedAmount
+                }
+              }
+            `,
+          })
+        ).globalVars;
+
+        return globalV;
+      } catch (err) {
+        console.error(err);
+      }
+    },
+
     user: async (_, { userAddress }) => {
       return {
         id: userAddress,
@@ -307,6 +329,9 @@ export const resolvers = {
     },
     artisan: async ({ id }) => {
       return (await getFellowship(id)).artisan;
+    },
+    raisedAmount: async ({ id }) => {
+      return (await getFellowship(id)).raisedAmount;
     },
   },
 };

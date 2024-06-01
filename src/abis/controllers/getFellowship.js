@@ -46,6 +46,7 @@ export const getFellowship = async (id) => {
             endorsements {
               id
             }
+            raisedAmount
           }
         }
       `,
