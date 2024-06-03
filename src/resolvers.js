@@ -322,4 +322,20 @@ export const resolvers = {
       return (await fellowshipLoader.load(id)).raisedAmount;
     },
   },
+
+  BackerBuck: {
+    id: async ({ id }, _, { backerBuckLoader }) => {
+      return id;
+    },
+    amount: async ({ id }, _, { backerBuckLoader }) => {
+      return (await backerBuckLoader.load(id)).amount;
+    },
+    owner: async ({ id }, _, { backerBuckLoader }) => {
+      console.log("owner", (await backerBuckLoader.load(id)).owner);
+      return (await backerBuckLoader.load(id)).owner;
+    },
+    fellowship: async ({ id }, _, { backerBuckLoader }) => {
+      return (await backerBuckLoader.load(id)).fellowship;
+    },
+  },
 };

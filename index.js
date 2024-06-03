@@ -8,8 +8,9 @@ import "dotenv/config";
 import DataLoader from "dataloader";
 import {
   getDeityByIds,
-  getUserByIds,
+  getUsersByIds,
   getFellowshipByIds,
+  getBackerBucksByIds,
 } from "./src/dataLoders.js";
 
 const main = async () => {
@@ -34,9 +35,10 @@ const main = async () => {
   const { url } = await startStandaloneServer(server, {
     listen: { port: 4000 },
     context: () => ({
-      userLoader: new DataLoader(getUserByIds),
+      userLoader: new DataLoader(getUsersByIds),
       fellowshipLoader: new DataLoader(getFellowshipByIds),
       deitiesLoader: new DataLoader(getDeityByIds),
+      backerBuckLoader: new DataLoader(getBackerBucksByIds),
     }),
   });
 

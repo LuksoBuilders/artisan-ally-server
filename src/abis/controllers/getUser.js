@@ -18,13 +18,6 @@ export const getUser = async (id) => {
             id
             backerBucks {
               id
-              fellowship {
-                id
-              }
-              owner {
-                id
-              }
-              amount
             }
             fellowships {
               id
