@@ -134,18 +134,6 @@ export const resolvers = {
               {
                 fellowships(where: { metadata_not: null }) {
                   id
-                  name
-                  metadata
-                  symbol
-                  endorsementAddress
-                  contributionAddress
-                  initialPrice
-                  priceGrowth
-                  currentPrice
-                  totalSupply
-                  artisan {
-                    id
-                  }
                 }
               }
             `,
@@ -153,11 +141,7 @@ export const resolvers = {
           })
         ).fellowships;
 
-        return targetFellowships.map((fellowship) => ({
-          ...fellowship,
-          // metadata: getLSP4Metadata(deity.metadata),
-        }));
-
+        return targetFellowships;
         //return [];
       } catch (err) {
         console.error(err);
@@ -193,54 +177,54 @@ export const resolvers = {
 
   User: {
     id: async ({ id }) => {
-      return (await getUser(id)).id;
+      return id;
     },
-    profile: async ({ id }) => {
+    profile: async ({ id }, _, { userLoader }) => {
       const lsp3Metadata = await getLSP3Profile(
         (
-          await getUser(id)
+          await userLoader.load(id)
         ).verifiableURI
       );
 
       return lsp3Metadata;
     },
-    backerBucks: async ({ id }) => {
-      return (await getUser(id)).backerBucks;
+    backerBucks: async ({ id }, _, { userLoader }) => {
+      return (await userLoader.load(id)).backerBucks;
     },
-    fellowships: async ({ id }) => {
-      return (await getUser(id)).fellowships;
+    fellowships: async ({ id }, _, { userLoader }) => {
+      return (await userLoader.load(id)).fellowships;
     },
-    deities: async ({ id }) => {
-      return (await getUser(id)).deities;
+    deities: async ({ id }, _, { userLoader }) => {
+      return (await userLoader.load(id)).deities;
     },
   },
 
   Deity: {
-    id: async ({ id }) => {
-      return (await getDeity(id)).id;
+    id: async ({ id }, _, { deitiesLoader }) => {
+      return id;
     },
 
-    tokenIdNumber: async ({ id }) => {
-      return (await getDeity(id)).tokenIdNumber;
+    tokenIdNumber: async ({ id }, _, { deitiesLoader }) => {
+      return (await deitiesLoader.load(id)).tokenIdNumber;
     },
-    tier: async ({ id }) => {
-      return (await getDeity(id)).tier;
+    tier: async ({ id }, _, { deitiesLoader }) => {
+      return (await deitiesLoader.load(id)).tier;
     },
-    metadata: async ({ id }) => {
-      return getLSP4Metadata((await getDeity(id)).metadata);
+    metadata: async ({ id }, _, { deitiesLoader }) => {
+      return getLSP4Metadata((await deitiesLoader.load(id)).metadata);
     },
-    level: async ({ id }) => {
-      return (await getDeity(id)).level;
+    level: async ({ id }, _, { deitiesLoader }) => {
+      return (await deitiesLoader.load(id)).level;
     },
-    xp: async ({ id }) => {
-      const rawXp = (await getDeity(id)).xp;
+    xp: async ({ id }, _, { deitiesLoader }) => {
+      const rawXp = (await deitiesLoader.load(id)).xp;
       return Number(ethers.utils.formatUnits(rawXp, 15)).toFixed(0);
     },
-    owner: async ({ id }) => {
-      return (await getDeity(id)).owner;
+    owner: async ({ id }, _, { deitiesLoader }) => {
+      return (await deitiesLoader.load(id)).owner;
     },
-    withdrawable: async ({ id }) => {
-      const deity = await getDeity(id);
+    withdrawable: async ({ id }, _, { deitiesLoader }) => {
+      const deity = await deitiesLoader.load(id);
 
       const getDeityFeePercent = () => {
         switch (deity.tier) {
@@ -264,74 +248,78 @@ export const resolvers = {
 
       return directFee.add(passiveFee).sub(harvested).toString();
     },
-    slots: async ({ id }) => {
-      return (await getDeity(id)).slots;
+    slots: async ({ id }, _, { deitiesLoader }) => {
+      return (await deitiesLoader.load(id)).slots;
     },
-    portfolio: async ({ id }) => {
-      return (await getDeity(id)).portfolio;
+    portfolio: async ({ id }, _, { deitiesLoader }) => {
+      return (await deitiesLoader.load(id)).portfolio;
     },
   },
 
   Fellowship: {
-    id: async ({ id }) => {
-      return (await getFellowship(id)).id;
+    id: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).id;
     },
-    name: async ({ id }) => {
-      return (await getFellowship(id)).name;
+    name: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).name;
     },
-    symbol: async ({ id }) => {
-      return (await getFellowship(id)).symbol;
+    symbol: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).symbol;
     },
-    address: async ({ id }) => {
-      return (await getFellowship(id)).address;
+    address: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).address;
     },
-    metadata: async ({ id }) => {
-      return (await getFellowship(id)).metadata;
+    metadata: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).metadata;
     },
-    info: async ({ id }) => {
+    info: async ({ id }, _, { fellowshipLoader }) => {
       try {
-        if (!(await getFellowship(id)).metadata) return null;
-        return await getLSP4Fellowship((await getFellowship(id)).metadata);
+        if (!(await fellowshipLoader.load(id)).metadata) return null;
+        return await getLSP4Fellowship(
+          (
+            await fellowshipLoader.load(id)
+          ).metadata
+        );
       } catch (err) {
         console.error(err);
         throw err;
       }
     },
-    contributionAddress: async ({ id }) => {
-      return (await getFellowship(id)).contributionAddress;
+    contributionAddress: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).contributionAddress;
     },
-    endorsementAddress: async ({ id }) => {
-      return (await getFellowship(id)).endorsementAddress;
+    endorsementAddress: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).endorsementAddress;
     },
-    priceGrowth: async ({ id }) => {
-      return (await getFellowship(id)).priceGrowth;
+    priceGrowth: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).priceGrowth;
     },
-    initialPrice: async ({ id }) => {
-      return (await getFellowship(id)).initialPrice;
+    initialPrice: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).initialPrice;
     },
-    currentPrice: async ({ id }) => {
-      return (await getFellowship(id)).currentPrice;
+    currentPrice: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).currentPrice;
     },
-    totalSupply: async ({ id }) => {
-      return (await getFellowship(id)).totalSupply;
+    totalSupply: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).totalSupply;
     },
-    backerBucks: async ({ id }) => {
-      return (await getFellowship(id)).backerBucks;
+    backerBucks: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).backerBucks;
     },
-    endorsements: async ({ id }) => {
-      return (await getFellowship(id)).endorsements;
+    endorsements: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).endorsements;
     },
-    contributions: async ({ id }) => {
-      return (await getFellowship(id)).contributions;
+    contributions: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).contributions;
     },
-    founder: async ({ id }) => {
-      return (await getFellowship(id)).founder;
+    founder: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).founder;
     },
-    artisan: async ({ id }) => {
-      return (await getFellowship(id)).artisan;
+    artisan: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).artisan;
     },
-    raisedAmount: async ({ id }) => {
-      return (await getFellowship(id)).raisedAmount;
+    raisedAmount: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).raisedAmount;
     },
   },
 };

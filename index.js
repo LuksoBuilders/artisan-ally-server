@@ -5,6 +5,13 @@ import { resolvers } from "./src/resolvers.js";
 import mongoose from "mongoose";
 import "dotenv/config";
 
+import DataLoader from "dataloader";
+import {
+  getDeityByIds,
+  getUserByIds,
+  getFellowshipByIds,
+} from "./src/dataLoders.js";
+
 const main = async () => {
   try {
     await mongoose.connect(process.env.MONGO);
@@ -26,6 +33,11 @@ const main = async () => {
   //  3. prepares your app to handle incoming requests
   const { url } = await startStandaloneServer(server, {
     listen: { port: 4000 },
+    context: () => ({
+      userLoader: new DataLoader(getUserByIds),
+      fellowshipLoader: new DataLoader(getFellowshipByIds),
+      deitiesLoader: new DataLoader(getDeityByIds),
+    }),
   });
 
   console.log(`🚀  Server ready at: ${url}`);

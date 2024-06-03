@@ -9,6 +9,7 @@
     "@apollo/server": "^4.10.4",
     "@lukso/lsp-smart-contracts": "^0.15.0",
     "axios": "^1.6.8",
+    "dataloader": "^2.2.2",
     "dotenv": "^16.4.5",
     "ethers": "5",
     "graphql": "^16.8.1",

@@ -51,11 +51,15 @@ const LSP3Profile = mongoose.model("LSP3Profile", LSP3ProfileSchema);
 
 export const getLSP3Profile = async (verifiableURI) => {
   try {
-    if (!verifiableURI) {
+    if (!verifiableURI || verifiableURI === "0x") {
       return {};
     }
 
     const existedMetadata = await LSP3Profile.findOne({ verifiableURI });
+
+    console.log(
+      existedMetadata ? "Existed!" : `Not Exists!!!! ${verifiableURI}`
+    );
 
     if (!existedMetadata) {
       const { decodedUrl } = parseVerifiableURI(verifiableURI);
