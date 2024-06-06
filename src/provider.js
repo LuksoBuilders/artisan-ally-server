@@ -25,7 +25,7 @@ const mainnetContractAddresses = {
 export const CONTRACT_ADDRESSES = mainnetContractAddresses;
 
 const testnetRPC = "https://4201.rpc.thirdweb.com";
-const mainnetRPC = "http://64.225.80.186:8545"; //"https://rpc.lukso.sigmacore.io";
+const mainnetRPC = "https://37278372983976287937sigma9302.enterprise.rpc.lukso.sigmacore.io"; //"https://rpc.lukso.sigmacore.io";
 
 const RPC_ADDRESS = mainnetRPC;
 

@@ -42,6 +42,8 @@ export const getFellowshipByIds = async (ids) => {
             id
           }
           raisedAmount
+          contributionAmount
+          endorsementAmount
         }
       }
     `,
@@ -122,6 +124,8 @@ export const getBackerBucksByIds = async (ids) => {
           fellowship {
             id
           }
+          purifiable
+          contributions
         }
       }
     `,
@@ -136,6 +140,7 @@ export const getBackerBucksByIds = async (ids) => {
     backerBucksMap[fellowship.id] = fellowship;
   });
 
+  
   // Return the data in the same order as the requested ids
   return ids.map((id) => backerBucksMap[id]);
 };
@@ -156,6 +161,7 @@ export const getUsersByIds = async (ids) => {
           deities {
             id
           }
+          holyShitsBalance
         }
       }
     `,

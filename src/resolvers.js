@@ -24,6 +24,7 @@ export const resolvers = {
                 globalVars(id: "0x00000000") {
                   totalFeeCollected
                   totalRaisedAmount
+                  divineDungDepotBalance
                 }
               }
             `,
@@ -148,7 +149,7 @@ export const resolvers = {
       }
     },
 
-    deities: async (_, {}) => {
+    deities: async (_, { }) => {
       try {
         const targetDeities = (
           await request({
@@ -196,6 +197,9 @@ export const resolvers = {
     },
     deities: async ({ id }, _, { userLoader }) => {
       return (await userLoader.load(id)).deities;
+    },
+    holyShitsBalance: async ({ id }, _, { userLoader }) => {
+      return (await userLoader.load(id)).holyShitsBalance;
     },
   },
 
@@ -321,6 +325,12 @@ export const resolvers = {
     raisedAmount: async ({ id }, _, { fellowshipLoader }) => {
       return (await fellowshipLoader.load(id)).raisedAmount;
     },
+    contributionAmount: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).contributionAmount;
+    },
+    endorsementAmount: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).endorsementAmount;
+    },
   },
 
   BackerBuck: {
@@ -336,6 +346,12 @@ export const resolvers = {
     },
     fellowship: async ({ id }, _, { backerBuckLoader }) => {
       return (await backerBuckLoader.load(id)).fellowship;
+    },
+    contributions: async ({ id }, _, { backerBuckLoader }) => {
+      return (await backerBuckLoader.load(id)).contributions;
+    },
+    purifiable: async ({ id }, _, { backerBuckLoader }) => {
+      return (await backerBuckLoader.load(id)).purifiable;
     },
   },
 };

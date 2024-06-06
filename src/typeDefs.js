@@ -115,6 +115,8 @@ export const typeDefs = `#graphql
       founder: Deity!
       artisan: User!
       raisedAmount: String!
+      contributionAmount: String!
+      endorsementAmount: String!
     }
     
     type Deity  {
@@ -135,6 +137,8 @@ export const typeDefs = `#graphql
       owner: User!
       fellowship: Fellowship!
       amount: String!
+      contributions: String!
+      purifiable: String!
     }
     
     type Contribution  {
@@ -163,6 +167,7 @@ export const typeDefs = `#graphql
     type GlobalVars {
       totalFeeCollected: String!
       totalRaisedAmount: String!
+      divineDungDepotBalance: String!
     }
 
     type Query {

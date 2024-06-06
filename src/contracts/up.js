@@ -15,19 +15,24 @@ export const getUserVerifiableURI = async (userAddress) => {
     console.log("loading from cache");
     return cachedVURI.data;
   } else {
-    const UPContract = new ethers.Contract(
-      userAddress,
-      UniversalProfileAbi,
-      Provider
-    );
+    try {
+      const UPContract = new ethers.Contract(
+        userAddress,
+        UniversalProfileAbi,
+        Provider
+      );
 
-    const data = await UPContract.getData(profileKey);
+      const data = await UPContract.getData(profileKey);
 
-    var validTill = new Date();
-    validTill.setMinutes(validTill.getMinutes() + 10);
+      var validTill = new Date();
+      validTill.setMinutes(validTill.getMinutes() + 10);
 
-    userVURICache.set(userAddress, { data, validTill });
+      userVURICache.set(userAddress, { data, validTill });
 
-    return data;
+      return data;
+    } catch (err) {
+      return "0x"
+    }
+
   }
 };
