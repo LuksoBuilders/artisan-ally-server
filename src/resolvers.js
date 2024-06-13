@@ -286,6 +286,14 @@ export const resolvers = {
         );
       } catch (err) {
         console.error(err);
+        return {
+          description: '',
+          assets: [],
+          images: [],
+          links: [],
+          attributes: []
+
+        }
         throw err;
       }
     },
