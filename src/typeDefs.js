@@ -117,6 +117,7 @@ export const typeDefs = `#graphql
       raisedAmount: String!
       contributionAmount: String!
       endorsementAmount: String!
+      version: String!
     }
     
     type Deity  {

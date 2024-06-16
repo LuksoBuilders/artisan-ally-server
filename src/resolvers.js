@@ -149,7 +149,7 @@ export const resolvers = {
       }
     },
 
-    deities: async (_, { }) => {
+    deities: async (_, {}) => {
       try {
         const targetDeities = (
           await request({
@@ -287,13 +287,12 @@ export const resolvers = {
       } catch (err) {
         console.error(err);
         return {
-          description: '',
+          description: "",
           assets: [],
           images: [],
           links: [],
-          attributes: []
-
-        }
+          attributes: [],
+        };
         throw err;
       }
     },
@@ -338,6 +337,9 @@ export const resolvers = {
     },
     endorsementAmount: async ({ id }, _, { fellowshipLoader }) => {
       return (await fellowshipLoader.load(id)).endorsementAmount;
+    },
+    version: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).version;
     },
   },
 

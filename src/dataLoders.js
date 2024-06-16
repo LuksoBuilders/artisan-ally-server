@@ -44,6 +44,7 @@ export const getFellowshipByIds = async (ids) => {
           raisedAmount
           contributionAmount
           endorsementAmount
+          version
         }
       }
     `,
