@@ -96,6 +96,13 @@ export const typeDefs = `#graphql
       holyShitsBalance: String!
     }
 
+    type FellowshipPrices {
+      initialPrice: String!
+      initialGrowthFactor: String!
+      eventualGrowthFactor: String!
+      diminishingFactor: String
+    }
+
     type Fellowship  {
       id: String!
       name: String
@@ -118,6 +125,7 @@ export const typeDefs = `#graphql
       contributionAmount: String!
       endorsementAmount: String!
       version: String!
+      prices: FellowshipPrices
     }
     
     type Deity  {

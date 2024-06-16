@@ -341,6 +341,9 @@ export const resolvers = {
     version: async ({ id }, _, { fellowshipLoader }) => {
       return (await fellowshipLoader.load(id)).version;
     },
+    prices: async ({ id }, _, { fellowshipLoader }) => {
+      return (await fellowshipLoader.load(id)).prices;
+    },
   },
 
   BackerBuck: {
