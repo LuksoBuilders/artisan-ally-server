@@ -64,6 +64,50 @@ export const resolvers = {
       }
     },
 
+    botBids: async () => {
+      try {
+        const targetBotBids = (
+          await request({
+            url: GRAPHQL_SERVER_ADDRESS,
+            document: gql`
+              query botBids {
+                botBids(first: 1000) {
+                  id
+                }
+              }
+            `,
+          })
+        ).botBids;
+
+        console.log(targetBotBids);
+
+        return targetBotBids;
+      } catch (err) {
+        console.error(err);
+      }
+    },
+
+    rockStars: async () => {
+      try {
+        const targetUsers = (
+          await request({
+            url: GRAPHQL_SERVER_ADDRESS,
+            document: gql`
+              query users {
+                users(first: 1000, where: { steloBalance_gte: 1 }) {
+                  id
+                }
+              }
+            `,
+          })
+        ).users;
+
+        return targetUsers;
+      } catch (err) {
+        console.error(err);
+      }
+    },
+
     userDeities: async (_, { userAddress }) => {
       try {
         const targetDeities = (
@@ -200,6 +244,12 @@ export const resolvers = {
     },
     holyShitsBalance: async ({ id }, _, { userLoader }) => {
       return (await userLoader.load(id)).holyShitsBalance;
+    },
+    steloBalance: async ({ id }, _, { userLoader }) => {
+      return (await userLoader.load(id)).steloBalance;
+    },
+    bid: async ({ id }, _, { userLoader }) => {
+      return { ...(await userLoader.load(id)).bid, user: id };
     },
   },
 
@@ -365,6 +415,21 @@ export const resolvers = {
     },
     purifiable: async ({ id }, _, { backerBuckLoader }) => {
       return (await backerBuckLoader.load(id)).purifiable;
+    },
+  },
+
+  Bid: {
+    id: async ({ id }, _, { botBidsLoader }) => {
+      return id;
+    },
+    amount: async ({ id }, _, { botBidsLoader }) => {
+      return (await botBidsLoader.load(id)).amount;
+    },
+    maxPrice: async ({ id }, _, { botBidsLoader }) => {
+      return (await botBidsLoader.load(id)).maxPrice;
+    },
+    user: async ({ id }, _, { botBidsLoader }) => {
+      return { id };
     },
   },
 };

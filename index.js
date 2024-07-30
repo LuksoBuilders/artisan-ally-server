@@ -11,7 +11,10 @@ import {
   getUsersByIds,
   getFellowshipByIds,
   getBackerBucksByIds,
+  getBotBidsByIds,
 } from "./src/dataLoders.js";
+
+import { steloAuctionBotKeeper } from "./src/keepers/steloAuctionBotKeeper.js";
 
 const main = async () => {
   try {
@@ -28,6 +31,9 @@ const main = async () => {
     resolvers,
   });
 
+  // Start the keeper
+  steloAuctionBotKeeper().catch(console.error);
+
   // Passing an ApolloServer instance to the `startStandaloneServer` function:
   //  1. creates an Express app
   //  2. installs your ApolloServer instance as middleware
@@ -39,6 +45,7 @@ const main = async () => {
       fellowshipLoader: new DataLoader(getFellowshipByIds),
       deitiesLoader: new DataLoader(getDeityByIds),
       backerBuckLoader: new DataLoader(getBackerBucksByIds),
+      botBidsLoader: new DataLoader(getBotBidsByIds),
     }),
   });
 

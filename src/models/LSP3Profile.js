@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import axios from "axios";
 import { parseVerifiableURI } from "../utils/index.js";
+import { IPFSGatewayModule } from "../utils/IPFSGatewayModule.js";
 
 const Schema = mongoose.Schema;
 
@@ -57,19 +58,20 @@ export const getLSP3Profile = async (verifiableURI) => {
 
     const existedMetadata = await LSP3Profile.findOne({ verifiableURI });
 
-    console.log(
-      existedMetadata ? "Existed!" : `Not Exists!!!! ${verifiableURI}`
-    );
-
     if (!existedMetadata) {
       const { decodedUrl } = parseVerifiableURI(verifiableURI);
-      const result = await axios.get(
-        decodedUrl.replace("ipfs://", "https://ipfs.io/ipfs/")
-      );
+
+      const cid = decodedUrl.replace("ipfs://", "");
+
+      const ipfsGateway = new IPFSGatewayModule();
+
+      const result = await ipfsGateway.getIPFSFile(cid);
+
+      console.log("result is: ", result);
 
       const lsp3Profile = new LSP3Profile({
         verifiableURI,
-        ...result.data.LSP3Profile,
+        ...result.LSP3Profile,
       });
       return await lsp3Profile.save();
     } else {

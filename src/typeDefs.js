@@ -84,6 +84,13 @@ export const typeDefs = `#graphql
         backgroundImage: [BackgroundImage]
     }
 
+    type Bid {
+      id: ID!
+      amount: String!
+      maxPrice: String!
+      user: User!
+    }
+
    type User {
       id: String!
       profile: LSP3Profile
@@ -94,6 +101,8 @@ export const typeDefs = `#graphql
       endorsements: [Endorsement!]! 
       endorseds: [Endorsement!]!
       holyShitsBalance: String!
+      steloBalance: String!
+      bid: Bid
     }
 
     type FellowshipPrices {
@@ -183,11 +192,13 @@ export const typeDefs = `#graphql
         globalVars: GlobalVars!
         user(userAddress: String!): User!
         users: [User!]!
+        rockStars: [User!]!
         deity(deityId: String!): Deity!
         deities: [Deity!]!
         userDeities(userAddress: String!): [Deity!]!
         userFellowships(userAddress: String!): [Fellowship!]!
         fellowship(id: String!): Fellowship
         fellowships: [Fellowship!]!
+        botBids: [Bid!]!
     }
 `;

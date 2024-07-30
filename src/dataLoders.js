@@ -147,7 +147,6 @@ export const getBackerBucksByIds = async (ids) => {
     backerBucksMap[fellowship.id] = fellowship;
   });
 
-  
   // Return the data in the same order as the requested ids
   return ids.map((id) => backerBucksMap[id]);
 };
@@ -169,6 +168,12 @@ export const getUsersByIds = async (ids) => {
             id
           }
           holyShitsBalance
+          steloBalance
+          bid {
+            id
+            amount
+            maxPrice
+          }
         }
       }
     `,
@@ -179,22 +184,33 @@ export const getUsersByIds = async (ids) => {
 
   let allUsers = [...users];
 
+  //console.log("allUsers: ", allUsers, ids);
+
   const notIncludedUsers = ids
     .map((id) => id.toLowerCase())
     .filter((id) => !users.map((user) => user.id.toLowerCase()).includes(id));
 
-  if (notIncludedUsers.length > 0) {
-    console.log(
-      "not included users",
-      ids.length,
-      ids,
-      notIncludedUsers,
-      users.map((user) => user.id)
-    );
-  }
+  //if (notIncludedUsers.length > 0) {
+  //  console.log(
+  //    "not included users",
+  //    ids.length,
+  //    ids,
+  //    notIncludedUsers,
+  //    users.map((user) => user.id)
+  //  );
+  //}
 
   notIncludedUsers.forEach((userId) =>
-    allUsers.push({ id: userId, backerBucks: [], fellowships: [], deities: [] })
+    allUsers.push({
+      id: userId,
+      backerBucks: [],
+      fellowships: [],
+      deities: [],
+      contributions: [],
+      endorsements: [],
+      holyShitsBalance: "0",
+      steloBalance: "0",
+    })
   );
 
   // Create a map of fellowship data by id
@@ -203,7 +219,7 @@ export const getUsersByIds = async (ids) => {
     usersMap[user.id.toLowerCase()] = user;
   });
 
-  console.log(usersMap);
+  //  console.log(usersMap);
 
   // Return the data in the same order as the requested ids
   return Promise.all(
@@ -217,4 +233,34 @@ export const getUsersByIds = async (ids) => {
         });
       })
   );
+};
+
+export const getBotBidsByIds = async (ids) => {
+  console.log('here?')
+  const { botBids } = await request({
+    url: GRAPHQL_SERVER_ADDRESS,
+    document: gql`
+      query botBids($ids: [ID!]!) {
+        botBids(where: { id_in: $ids }, first: 1000) {
+          id
+          amount
+          maxPrice
+        }
+      }
+    `,
+    variables: {
+      ids,
+    },
+  });
+
+  console.log(botBids)
+
+  // Create a map of fellowship data by id
+  const botBidsMap = {};
+  botBids.forEach((botBid) => {
+    botBidsMap[botBid.id] = botBid;
+  });
+
+  // Return the data in the same order as the requested ids
+  return ids.map((id) => botBidsMap[id]);
 };
