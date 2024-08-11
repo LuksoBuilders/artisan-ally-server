@@ -103,6 +103,9 @@ export const typeDefs = `#graphql
       holyShitsBalance: String!
       steloBalance: String!
       bid: Bid
+      feed: Feed
+      followedFeeds: [Feed!]!
+
     }
 
     type FellowshipPrices {
@@ -188,17 +191,63 @@ export const typeDefs = `#graphql
       divineDungDepotBalance: String!
     }
 
+
+    type Feed {
+      id: ID!
+      owner: User!
+      posts: [Post!]!
+      postCount: String!
+      followers: [User!]!
+      followerCount: String!
+    }
+
+    type PostContent {
+      variant: String
+      content: String
+    }
+
+    type Post {
+      id: ID!
+      feed: Feed!
+      postType: String!
+      content: PostContent
+      creator: User!
+      referenceFeed: String
+      referencePost: Post
+      isDeleted: Boolean!
+      isStarred: Boolean!
+      createdAt: String!
+      replies: [Post!]!
+      mirrors: [Post!]!
+      tips: [Tip!]!
+    }
+
+    type Tip {
+      id: ID!
+      tipper: User!
+      feed: Feed!
+      post: Post!
+      amount: String!
+    }
+
     type Query {
-        globalVars: GlobalVars!
-        user(userAddress: String!): User!
-        users: [User!]!
-        rockStars: [User!]!
-        deity(deityId: String!): Deity!
-        deities: [Deity!]!
-        userDeities(userAddress: String!): [Deity!]!
-        userFellowships(userAddress: String!): [Fellowship!]!
-        fellowship(id: String!): Fellowship
-        fellowships: [Fellowship!]!
-        botBids: [Bid!]!
+      globalVars: GlobalVars!
+      user(userAddress: String!): User!
+      users: [User!]!
+      rockStars: [User!]!
+      deity(deityId: String!): Deity!
+      deities: [Deity!]!
+      userDeities(userAddress: String!): [Deity!]!
+      userFellowships(userAddress: String!): [Fellowship!]!
+      fellowship(id: String!): Fellowship
+      fellowships: [Fellowship!]!
+      botBids: [Bid!]!
+      feed(id: ID!): Feed
+      post(id: ID!): Post
+      homePagePosts(limit: Int!, offset: Int!, userAddress: String): [Post!]!
+    }
+
+    type Mutation {
+      uploadPostContent(body: String!): String!
     }
 `;

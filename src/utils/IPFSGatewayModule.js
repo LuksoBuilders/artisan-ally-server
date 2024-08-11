@@ -11,6 +11,7 @@ export class IPFSGatewayModule {
     "https://cloudflare-ipfs.com",
     "https://gateway.pinata.cloud",
     "https://dweb.link",
+    "https://gateway.mesh3.network",
   ];
 
   constructor(
@@ -31,9 +32,6 @@ export class IPFSGatewayModule {
   }
 
   async getIPFSFile(cid) {
-
-    console.log(cid)
-
     const cachedFile = await this.getFromCache(cid);
     if (cachedFile) {
       return cachedFile;

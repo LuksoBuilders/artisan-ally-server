@@ -174,6 +174,12 @@ export const getUsersByIds = async (ids) => {
             amount
             maxPrice
           }
+          feed {
+            id
+          }
+          followedFeeds {
+            id
+          }
         }
       }
     `,
@@ -236,7 +242,7 @@ export const getUsersByIds = async (ids) => {
 };
 
 export const getBotBidsByIds = async (ids) => {
-  console.log('here?')
+  console.log("here?");
   const { botBids } = await request({
     url: GRAPHQL_SERVER_ADDRESS,
     document: gql`
@@ -253,7 +259,7 @@ export const getBotBidsByIds = async (ids) => {
     },
   });
 
-  console.log(botBids)
+  console.log(botBids);
 
   // Create a map of fellowship data by id
   const botBidsMap = {};
@@ -263,4 +269,81 @@ export const getBotBidsByIds = async (ids) => {
 
   // Return the data in the same order as the requested ids
   return ids.map((id) => botBidsMap[id]);
+};
+
+export const getFeedByIds = async (ids) => {
+  const { feeds } = await request({
+    url: GRAPHQL_SERVER_ADDRESS,
+    document: gql`
+      query feeds($ids: [ID!]!) {
+        feeds(where: { id_in: $ids }) {
+          id
+          owner {
+            id
+          }
+          posts {
+            id
+          }
+          postCount
+          followers {
+            id
+          }
+          followerCount
+        }
+      }
+    `,
+    variables: { ids },
+  });
+
+  const feedMap = {};
+  feeds.forEach((feed) => {
+    feedMap[feed.id] = feed;
+  });
+
+  return ids.map((id) => feedMap[id]);
+};
+
+export const getPostByIds = async (ids) => {
+  const { posts } = await request({
+    url: GRAPHQL_SERVER_ADDRESS,
+    document: gql`
+      query posts($ids: [ID!]!) {
+        posts(where: { id_in: $ids }) {
+          id
+          feed {
+            id
+          }
+          postType
+          content
+          creator {
+            id
+          }
+          referenceFeed
+          referencePost {
+            id
+          }
+          isDeleted
+          isStarred
+          createdAt
+          replies {
+            id
+          }
+          mirrors {
+            id
+          }
+          tips {
+            id
+          }
+        }
+      }
+    `,
+    variables: { ids },
+  });
+
+  const postMap = {};
+  posts.forEach((post) => {
+    postMap[post.id] = post;
+  });
+
+  return ids.map((id) => postMap[id]);
 };

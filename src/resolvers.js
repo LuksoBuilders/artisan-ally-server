@@ -5,6 +5,7 @@ import { GRAPHQL_SERVER_ADDRESS } from "./serverAddress.js";
 import { getLSP4Metadata } from "./models/LSP4Metadata.js";
 import { getLSP3Profile } from "./models/LSP3Profile.js";
 import { getLSP4Fellowship } from "./models/LSP4Fellowship.js";
+import { getPostContent } from "./models/PostContent.js";
 
 import { getDeity } from "./abis/controllers/getDeity.js";
 import { getFellowship } from "./abis/controllers/getFellowship.js";
@@ -12,7 +13,33 @@ import { getUser } from "./abis/controllers/getUser.js";
 
 import { ethers } from "ethers";
 
+import { uploadJson } from "./ipfs/uploadJson.js";
+
+function parseVerifiableURI(verifiableURI) {
+  const stripped = verifiableURI.startsWith("0x")
+    ? verifiableURI.slice(2)
+    : verifiableURI;
+
+  const verificationMethod = "0x" + stripped.slice(4, 12);
+  const verificationDataLength = parseInt(stripped.slice(12, 16), 16);
+  const verificationData =
+    "0x" + stripped.slice(16, 16 + verificationDataLength * 2);
+  const encodedURI = stripped.slice(16 + verificationDataLength * 2);
+
+  return {
+    verificationMethod,
+    verificationData,
+    uri: encodedURI ? ethers.utils.toUtf8String("0x" + encodedURI) : "",
+  };
+}
+
 export const resolvers = {
+  Mutation: {
+    uploadPostContent: async (_, { body }) => {
+      return await uploadJson(body);
+    },
+  },
+
   Query: {
     globalVars: async (_) => {
       try {
@@ -218,6 +245,42 @@ export const resolvers = {
         id: deityId,
       };
     },
+
+    feed: async (_, { id }) => {
+      return { id };
+    },
+
+    post: async (_, { id }) => {
+      return { id };
+    },
+
+    homePagePosts: async (_, { limit, offset, userAddress }) => {
+      try {
+        const targetPosts = (
+          await request({
+            url: GRAPHQL_SERVER_ADDRESS,
+            document: gql`
+              query posts {
+                posts(
+                  where: { isDeleted: false }
+                  orderBy: createdAt
+                  orderDirection: desc
+                ) {
+                  id
+                }
+              }
+            `,
+            variables: {
+              owner: userAddress,
+            },
+          })
+        ).posts;
+
+        return targetPosts;
+      } catch (err) {
+        console.error(err);
+      }
+    },
   },
 
   User: {
@@ -250,6 +313,14 @@ export const resolvers = {
     },
     bid: async ({ id }, _, { userLoader }) => {
       return { ...(await userLoader.load(id)).bid, user: id };
+    },
+    feed: async ({ id }, _, { userLoader }) => {
+      const user = await userLoader.load(id);
+      return user.feed ? { id: user.feed.id } : null;
+    },
+    followedFeeds: async ({ id }, _, { userLoader }) => {
+      const user = await userLoader.load(id);
+      return user.followedFeeds.map((feed) => ({ id: feed.id }));
     },
   },
 
@@ -430,6 +501,77 @@ export const resolvers = {
     },
     user: async ({ id }, _, { botBidsLoader }) => {
       return { id };
+    },
+  },
+
+  Feed: {
+    owner: async ({ id }, _, { feedLoader }) => {
+      const feed = await feedLoader.load(id);
+      return { id: feed.owner.id };
+    },
+    posts: async ({ id }, _, { feedLoader }) => {
+      const feed = await feedLoader.load(id);
+      return feed.posts.map((post) => ({ id: post.id }));
+    },
+    postCount: async ({ id }, _, { feedLoader }) => {
+      const feed = await feedLoader.load(id);
+      return feed.postCount.toString();
+    },
+    followers: async ({ id }, _, { feedLoader }) => {
+      const feed = await feedLoader.load(id);
+      return feed.followers.map((follower) => ({ id: follower.id }));
+    },
+    followerCount: async ({ id }, _, { feedLoader }) => {
+      const feed = await feedLoader.load(id);
+      return feed.followerCount.toString();
+    },
+  },
+
+  Post: {
+    feed: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return { id: post.feed.id };
+    },
+    creator: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return { id: post.creator.id };
+    },
+    content: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      const postContent = await getPostContent(post.content);
+      return postContent;
+    },
+    postType: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.postType;
+    },
+    isDeleted: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.isDeleted;
+    },
+    isStarred: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.isStarred;
+    },
+    createdAt: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.createdAt;
+    },
+    referencePost: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.referencePost ? { id: post.referencePost.id } : null;
+    },
+    replies: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.replies.map((reply) => ({ id: reply.id }));
+    },
+    mirrors: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.mirrors.map((mirror) => ({ id: mirror.id }));
+    },
+    tips: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.tips.map((tip) => ({ id: tip.id }));
     },
   },
 };

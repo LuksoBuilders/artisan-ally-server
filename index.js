@@ -12,6 +12,8 @@ import {
   getFellowshipByIds,
   getBackerBucksByIds,
   getBotBidsByIds,
+  getFeedByIds,
+  getPostByIds
 } from "./src/dataLoders.js";
 
 import { steloAuctionBotKeeper } from "./src/keepers/steloAuctionBotKeeper.js";
@@ -32,6 +34,8 @@ const main = async () => {
   });
 
   // Start the keeper
+
+  // UNCOMMENT THIS!!!!!
   steloAuctionBotKeeper().catch(console.error);
 
   // Passing an ApolloServer instance to the `startStandaloneServer` function:
@@ -46,6 +50,8 @@ const main = async () => {
       deitiesLoader: new DataLoader(getDeityByIds),
       backerBuckLoader: new DataLoader(getBackerBucksByIds),
       botBidsLoader: new DataLoader(getBotBidsByIds),
+      feedLoader: new DataLoader(getFeedByIds),
+      postLoader: new DataLoader(getPostByIds),
     }),
   });
 
