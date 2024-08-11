@@ -278,10 +278,21 @@ export const resolvers = {
 
         const blockedPosts = [
           "0xc8acea6b01d10d37ea3704cd406d0ea11000b862-0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0xc8acea6b01d10d37ea3704cd406d0ea11000b862-0x0000000000000000000000000000000000000000000000000000000000000001"
+          "0xc8acea6b01d10d37ea3704cd406d0ea11000b862-0x0000000000000000000000000000000000000000000000000000000000000001",
         ];
 
-        return targetPosts.filter(tgPost => !blockedPosts.includes(tgPost.id));
+        const blockedUsers = ["0xc8acea6b01d10d37ea3704cd406d0ea11000b862"];
+
+        return targetPosts.filter((tgPost) => {
+          const userId = tgPost.id.split("-")[0];
+
+          const isNotBlockedPost = !blockedPosts.includes(tgPost.id);
+
+          // Check if the post's author is not in blockedUsers
+          const isNotBlockedUser = !blockedUsers.includes(userId);
+
+          return isNotBlockedPost && isNotBlockedUser;
+        });
       } catch (err) {
         console.error(err);
       }
