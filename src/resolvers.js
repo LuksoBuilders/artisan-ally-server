@@ -276,7 +276,11 @@ export const resolvers = {
           })
         ).posts;
 
-        return targetPosts;
+        const blockedPosts = [
+          "0xc8acea6b01d10d37ea3704cd406d0ea11000b862-0x0000000000000000000000000000000000000000000000000000000000000000",
+        ];
+
+        return targetPosts.filter(tgPost => !blockedPosts.includes(tgPost.id));
       } catch (err) {
         console.error(err);
       }
