@@ -97,6 +97,6 @@ export async function steloAuctionBotKeeper() {
   }
 
   // Run the check every 20 seconds
-  setInterval(checkAndParticipate, 20000);
+  setInterval(checkAndParticipate, 1000);
 }
 
