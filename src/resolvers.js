@@ -1,4 +1,8 @@
+import "dotenv/config";
+
 import { gql, request } from "graphql-request";
+import { withFilter } from "graphql-subscriptions";
+
 import { getUserVerifiableURI } from "./contracts/up.js";
 import { GRAPHQL_SERVER_ADDRESS } from "./serverAddress.js";
 
@@ -14,6 +18,39 @@ import { getUser } from "./abis/controllers/getUser.js";
 import { ethers } from "ethers";
 
 import { uploadJson } from "./ipfs/uploadJson.js";
+
+import { NotificationService } from "./notifications/NotificationService.js";
+
+import { Notification } from "./models/Notification.js";
+
+const notificationService = new NotificationService();
+
+const randomedFollowers = [
+  "0x9901d6670e465e174ac7d4c5cfa9a4a78f6d8e21",
+  "0x64318cddf0f87dba45be181584c54ae955abf2d2",
+  "0xab5773b774c532aad8e60b088eb77c7cc937448a",
+  "0x64318cddf0f87dba45be181584c54ae955abf2d2",
+  "0xf740391144cf5cdc65e2e520808575c023516970",
+  "0xcecd1798420a533c9627770e052f49aa127c3b3b",
+];
+
+const getRandomFollower = () => {
+  const randomIndex = Math.floor(Math.random() * randomedFollowers.length);
+  return randomedFollowers[randomIndex].toLowerCase();
+};
+
+const sendTestNotification = () => {
+  setInterval(async () => {
+    console.log("sending a test notification");
+    notificationService.processNotification({
+      type: "follow",
+      recipient: "0x55E0F69F4b89d873f1d72449954F8F83C867be97".toLowerCase(),
+      payload: [getRandomFollower()],
+    });
+  }, 5000);
+};
+
+//sendTestNotification();
 
 function parseVerifiableURI(verifiableURI) {
   const stripped = verifiableURI.startsWith("0x")
@@ -34,9 +71,50 @@ function parseVerifiableURI(verifiableURI) {
 }
 
 export const resolvers = {
+  Subscription: {
+    newNotification: {
+      subscribe: withFilter(
+        () => notificationService.pubsub.asyncIterator(["NEW_NOTIFICATION"]),
+        (payload, variables) => {
+          console.log(
+            "a subscription happened: ",
+            variables.userId.toLowerCase()
+          );
+          return (
+            payload.newNotification.recipient === variables.userId.toLowerCase()
+          );
+        }
+      ),
+      resolve: (payload) => {
+        // Extract just the id from the notification and return it in an object
+        return { id: payload.newNotification._id.toString() };
+      },
+    },
+  },
+
   Mutation: {
     uploadPostContent: async (_, { body }) => {
       return await uploadJson(body);
+    },
+
+    registerOrUpdateUser: async (_, { input }) => {
+      const { address, pushSubscription } = input;
+
+      try {
+        const user = await notificationService.registerOrUpdateUser(
+          address,
+          pushSubscription
+        );
+        return "success";
+      } catch (error) {
+        console.error("Error in registerOrUpdateUser:", error);
+        throw new Error("Failed to register or update user");
+      }
+    },
+
+    seen: async (_, { userId }) => {
+      await notificationService.markNotificationAsSeen(userId);
+      return "done";
     },
   },
 
@@ -105,8 +183,6 @@ export const resolvers = {
             `,
           })
         ).botBids;
-
-        console.log(targetBotBids);
 
         return targetBotBids;
       } catch (err) {
@@ -338,6 +414,60 @@ export const resolvers = {
       const user = await userLoader.load(id);
       return user.followedFeeds.map((feed) => ({ id: feed.id }));
     },
+    notifications: async ({ id }, { limit = 10, offset = 0 }) => {
+      const query = { recipient: id };
+
+      const notifications = await Notification.find(query)
+        .sort({ _id: -1 })
+        .skip(offset)
+        .limit(limit + 1); // Fetch one extra to check if there's more
+
+      const hasMore = notifications.length > limit;
+      const paginatedNotifications = notifications.slice(0, limit);
+
+      const unseenCount = await Notification.countDocuments({
+        recipient: id,
+        seen: false,
+      });
+
+      return {
+        notifications: paginatedNotifications.map((notif) => ({
+          id: String(notif._id),
+        })),
+        unseenCount,
+        hasMore,
+      };
+    },
+  },
+
+  Notification: {
+    id: ({ id }, _, { notificationLoader }) => {
+      return id;
+    },
+    type: async ({ id }, _, { notificationLoader }) => {
+      const notification = await notificationLoader.load(id);
+      return notification.type;
+    },
+    recipient: async ({ id }, _, { notificationLoader }) => {
+      const notification = await notificationLoader.load(id);
+      return notification.recipient;
+    },
+    from: async ({ id }, _, { notificationLoader }) => {
+      const notification = await notificationLoader.load(id);
+      return notification.from;
+    },
+    payload: async ({ id }, _, { notificationLoader }) => {
+      const notification = await notificationLoader.load(id);
+      return notification.payload;
+    },
+    seen: async ({ id }, _, { notificationLoader }) => {
+      const notification = await notificationLoader.load(id);
+      return notification.seen;
+    },
+    createdAt: async ({ id }, _, { notificationLoader }) => {
+      const notification = await notificationLoader.load(id);
+      return notification.createdAt;
+    },
   },
 
   Deity: {
@@ -491,7 +621,6 @@ export const resolvers = {
       return (await backerBuckLoader.load(id)).amount;
     },
     owner: async ({ id }, _, { backerBuckLoader }) => {
-      console.log("owner", (await backerBuckLoader.load(id)).owner);
       return (await backerBuckLoader.load(id)).owner;
     },
     fellowship: async ({ id }, _, { backerBuckLoader }) => {

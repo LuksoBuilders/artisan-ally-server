@@ -67,8 +67,6 @@ export const getLSP3Profile = async (verifiableURI) => {
 
       const result = await ipfsGateway.getIPFSFile(cid);
 
-      console.log("result is: ", result);
-
       const lsp3Profile = new LSP3Profile({
         verifiableURI,
         ...result.LSP3Profile,

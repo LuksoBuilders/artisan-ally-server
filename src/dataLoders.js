@@ -3,6 +3,9 @@ import { gql, request } from "graphql-request";
 import { GRAPHQL_SERVER_ADDRESS } from "./serverAddress.js";
 import { getUserVerifiableURI } from "./contracts/up.js";
 
+import { Notification } from "./models/Notification.js";
+import { transformNotification } from "./notifications/utils.js";
+
 //export const getUserByIds = async (ids) => {
 //  return ids.map((id) => getUser(id));
 //};
@@ -190,21 +193,9 @@ export const getUsersByIds = async (ids) => {
 
   let allUsers = [...users];
 
-  //console.log("allUsers: ", allUsers, ids);
-
   const notIncludedUsers = ids
     .map((id) => id.toLowerCase())
     .filter((id) => !users.map((user) => user.id.toLowerCase()).includes(id));
-
-  //if (notIncludedUsers.length > 0) {
-  //  console.log(
-  //    "not included users",
-  //    ids.length,
-  //    ids,
-  //    notIncludedUsers,
-  //    users.map((user) => user.id)
-  //  );
-  //}
 
   notIncludedUsers.forEach((userId) =>
     allUsers.push({
@@ -242,7 +233,6 @@ export const getUsersByIds = async (ids) => {
 };
 
 export const getBotBidsByIds = async (ids) => {
-  console.log("here?");
   const { botBids } = await request({
     url: GRAPHQL_SERVER_ADDRESS,
     document: gql`
@@ -346,4 +336,14 @@ export const getPostByIds = async (ids) => {
   });
 
   return ids.map((id) => postMap[id]);
+};
+
+export const getNotificationsById = async (ids) => {
+  const notifications = await Notification.find({ _id: { $in: ids } });
+  const notificationMap = {};
+  notifications.forEach((notification) => {
+    notificationMap[notification._id.toString()] =
+      transformNotification(notification);
+  });
+  return ids.map((id) => notificationMap[id]);
 };

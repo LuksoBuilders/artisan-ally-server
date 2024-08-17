@@ -91,6 +91,34 @@ export const typeDefs = `#graphql
       user: User!
     }
 
+
+    type PushSubscription {
+      endpoint: String!
+      keys: PushSubscriptionKeys!
+    }
+
+    type PushSubscriptionKeys {
+      p256dh: String!
+      auth: String!
+    }
+
+    type Notification {
+      id: ID!
+      type: String!
+      recipient: User!
+      from: User!
+      payload: [String!]!
+      seen: Boolean!
+      createdAt: String!
+    }
+
+    type PaginatedNotifications {
+      notifications: [Notification!]!
+      unseenCount: Int!
+      hasMore: Boolean!
+    }
+
+
    type User {
       id: String!
       profile: LSP3Profile
@@ -105,7 +133,8 @@ export const typeDefs = `#graphql
       bid: Bid
       feed: Feed
       followedFeeds: [Feed!]!
-
+      pushSubscription: PushSubscription
+      notifications(limit: Int, offset: Int): PaginatedNotifications!
     }
 
     type FellowshipPrices {
@@ -247,7 +276,31 @@ export const typeDefs = `#graphql
       homePagePosts(limit: Int!, offset: Int!, userAddress: String): [Post!]!
     }
 
+    input PushSubscriptionKeysInput {
+      p256dh: String!
+      auth: String!
+    }
+
+    input PushSubscriptionInput {
+      endpoint: String!
+      keys: PushSubscriptionKeysInput!
+    }
+
+
+    input RegisterOrUpdateUserInput {
+      address: String!
+      pushSubscription: PushSubscriptionInput
+    }
+
+
     type Mutation {
+      registerOrUpdateUser(input: RegisterOrUpdateUserInput!): String!
       uploadPostContent(body: String!): String!
+      seen(userId: String!): String!
+    }
+
+
+    type Subscription {
+      newNotification(userId: ID!): Notification!
     }
 `;
