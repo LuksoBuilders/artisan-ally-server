@@ -5,8 +5,8 @@ import { request, gql } from "graphql-request";
 
 import { PubSub } from "graphql-subscriptions";
 import { GRAPHQL_SERVER_ADDRESS } from "../serverAddress.js";
-import fs from 'fs/promises';
-import path from 'path';
+import fs from "fs/promises";
+import path from "path";
 
 const TIMESTAMP_FILE = path.join(process.cwd(), "last_processed_timestamp.txt");
 
@@ -15,6 +15,7 @@ export class NotificationService {
     this.pubsub = new PubSub();
     this.lastProcessedTimestamp = "0"; // Initialize with '0' to fetch all alerts initially
     this.isInitialSyncComplete = false;
+    this.isProcessing = false;
     this.initializeLastProcessedTimestamp();
   }
 
@@ -70,17 +71,28 @@ export class NotificationService {
   }
 
   async processNewAlerts() {
-    if (!this.isInitialSyncComplete) return;
+    if (!this.isInitialSyncComplete || this.isProcessing) return;
 
-    const alerts = await this.fetchAlerts(this.lastProcessedTimestamp, 100);
-    for (const alert of alerts) {
-      await this.processAlert(alert);
-    }
-    if (alerts.length > 0) {
-      this.lastProcessedTimestamp = (
-        parseInt(alerts[alerts.length - 1].createdAt) + 1
-      ).toString();
-      await this.saveLastProcessedTimestamp();
+    this.isProcessing = true;
+
+    try {
+      const alerts = await this.fetchAlerts(this.lastProcessedTimestamp, 100);
+      if (alerts.length > 0) {
+        const newTimestamp = (
+          parseInt(alerts[alerts.length - 1].createdAt) + 1
+        ).toString();
+        await this.saveLastProcessedTimestamp(newTimestamp);
+
+        for (const alert of alerts) {
+          await this.processAlert(alert);
+        }
+
+        this.lastProcessedTimestamp = newTimestamp;
+      }
+    } catch (error) {
+      console.error("Error processing new alerts:", error);
+    } finally {
+      this.isProcessing = false;
     }
   }
 
@@ -111,12 +123,22 @@ export class NotificationService {
   }
 
   async processAlert(alert) {
+    const existingNotification = await Notification.findOne({
+      alertId: alert.id,
+    });
+
+    if (existingNotification) {
+      console.log(`Duplicate alert detected and skipped: ${alert.id}`);
+      return;
+    }
+
     const notificationData = {
       type: alert.type,
       recipient: alert.recipient.id,
       payload: alert.payload,
       createdAt: new Date(Number(alert.createdAt) *(1000))
     };
+    
     await this.processNotification(notificationData);
   }
 
@@ -151,7 +173,7 @@ export class NotificationService {
       recipient,
       payload,
       seen: false,
-      createdAt
+      createdAt,
     });
     await notification.save();
 
