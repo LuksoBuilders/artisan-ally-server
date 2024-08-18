@@ -40,7 +40,7 @@ const main = async () => {
   // Start the keeper
 
   // UNCOMMENT THIS!!!!!
-  //steloAuctionBotKeeper().catch(console.error);
+  steloAuctionBotKeeper().catch(console.error);
 
   const app = express();
   const httpServer = createServer(app);
