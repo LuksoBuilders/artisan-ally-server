@@ -44,7 +44,7 @@ export async function sendWebPushNotification(subscription, type, payload) {
 
 export async function createNotificationMessage(type, payload) {
   switch (type) {
-    case "follow":
+    case "follow": {
       const follower = payload[0];
       const verifiableURI = await getUserVerifiableURI(follower.toLowerCase());
 
@@ -54,11 +54,18 @@ export async function createNotificationMessage(type, payload) {
         title: "New Follower",
         body: `${followerLSP3Metadata.name} started following you`,
       };
-    case "reply":
+    }
+    case "reply": {
+      const replier = payload[0];
+      const verifiableURI = await getUserVerifiableURI(replier.toLowerCase());
+
+      const followerLSP3Metadata = await getLSP3Profile(verifiableURI);
+
       return {
         title: "New Reply",
-        body: `${payload[0]} replied to your post`,
+        body: `${followerLSP3Metadata.name} replied to your post`,
       };
+    }
     case "mirror":
       return {
         title: "New Mirror",

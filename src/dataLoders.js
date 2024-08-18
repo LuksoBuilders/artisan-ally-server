@@ -271,7 +271,7 @@ export const getFeedByIds = async (ids) => {
           owner {
             id
           }
-          posts {
+          posts(where: { isDeleted: false }) {
             id
           }
           postCount
@@ -315,12 +315,18 @@ export const getPostByIds = async (ids) => {
           isDeleted
           isStarred
           createdAt
-          replies {
+          parents {
             id
           }
-          mirrors {
+          replies(where: { isDeleted: false }) {
             id
           }
+          repliesCount
+          mirrors(where: { isDeleted: false }) {
+            id
+          }
+          mirrorsCount
+
           tips {
             id
           }

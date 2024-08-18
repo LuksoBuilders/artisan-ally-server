@@ -14,6 +14,12 @@ export const transformNotification = (notification) => {
         from: { id: notification.payload[0] },
         payload: notification.payload,
       };
+    case "reply":
+      return {
+        ...baseNotification,
+        from: { id: notification.payload[0] },
+        payload: notification.payload,
+      };
     // Add more cases for other notification types as needed
     default:
       return baseNotification;

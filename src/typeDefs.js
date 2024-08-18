@@ -246,7 +246,10 @@ export const typeDefs = `#graphql
       isDeleted: Boolean!
       isStarred: Boolean!
       createdAt: String!
+      parents: [Post!]!
+      repliesCount: Int!
       replies: [Post!]!
+      mirrorsCount: Int!
       mirrors: [Post!]!
       tips: [Tip!]!
     }

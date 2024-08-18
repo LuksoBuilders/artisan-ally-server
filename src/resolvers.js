@@ -338,7 +338,7 @@ export const resolvers = {
             document: gql`
               query posts {
                 posts(
-                  where: { isDeleted: false }
+                  where: { isDeleted: false, referencePost: null }
                   orderBy: createdAt
                   orderDirection: desc
                 ) {
@@ -706,13 +706,25 @@ export const resolvers = {
       const post = await postLoader.load(id);
       return post.referencePost ? { id: post.referencePost.id } : null;
     },
+    parents: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.parents.map((reply) => ({ id: reply.id }));
+    },
     replies: async ({ id }, _, { postLoader }) => {
       const post = await postLoader.load(id);
       return post.replies.map((reply) => ({ id: reply.id }));
     },
+    repliesCount: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.repliesCount;
+    },
     mirrors: async ({ id }, _, { postLoader }) => {
       const post = await postLoader.load(id);
       return post.mirrors.map((mirror) => ({ id: mirror.id }));
+    },
+    mirrorsCount: async ({ id }, _, { postLoader }) => {
+      const post = await postLoader.load(id);
+      return post.mirrorsCount;
     },
     tips: async ({ id }, _, { postLoader }) => {
       const post = await postLoader.load(id);
