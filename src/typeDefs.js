@@ -135,6 +135,7 @@ export const typeDefs = `#graphql
       followedFeeds: [Feed!]!
       pushSubscription: PushSubscription
       notifications(limit: Int, offset: Int): PaginatedNotifications!
+      flagged: Boolean!
     }
 
     type FellowshipPrices {

@@ -52,6 +52,8 @@ const sendTestNotification = () => {
 
 //sendTestNotification();
 
+const flaggedUsers = ["0x3f2058f7e0105972066c1d4d3803adf0df28c42b"];
+
 function parseVerifiableURI(verifiableURI) {
   const stripped = verifiableURI.startsWith("0x")
     ? verifiableURI.slice(2)
@@ -359,7 +361,7 @@ export const resolvers = {
 
         const blockedUsers = ["0xc8acea6b01d10d37ea3704cd406d0ea11000b862"];
 
-        console.log('we have the home posts')
+        console.log("we have the home posts");
 
         return targetPosts.filter((tgPost) => {
           const userId = tgPost.id.split("-")[0];
@@ -371,8 +373,6 @@ export const resolvers = {
 
           return isNotBlockedPost && isNotBlockedUser;
         });
-
-
       } catch (err) {
         console.error(err);
       }
@@ -419,8 +419,7 @@ export const resolvers = {
       return user.followedFeeds.map((feed) => ({ id: feed.id }));
     },
     notifications: async ({ id }, { limit = 10, offset = 0 }) => {
-
-      console.log('getting notifs')
+      console.log("getting notifs");
 
       const query = { recipient: id };
 
@@ -432,15 +431,14 @@ export const resolvers = {
       const hasMore = notifications.length > limit;
       const paginatedNotifications = notifications.slice(0, limit);
 
-      console.log('mid notifs')
+      console.log("mid notifs");
 
       const unseenCount = await Notification.countDocuments({
         recipient: id,
         seen: false,
       });
 
-      console.log('got the notif')
-
+      console.log("got the notif");
 
       return {
         notifications: paginatedNotifications.map((notif) => ({
@@ -449,6 +447,11 @@ export const resolvers = {
         unseenCount,
         hasMore,
       };
+    },
+    flagged: async ({ id }) => {
+      return flaggedUsers
+        .map((flaggedUser) => flaggedUser.toLowerCase())
+        .includes(id.toLowerCase());
     },
   },
 
