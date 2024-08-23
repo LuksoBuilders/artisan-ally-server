@@ -38,7 +38,10 @@ const BackgroundImageSchema = new Schema({
 });
 
 const LSP3ProfileSchema = new Schema({
-  verifiableURI: String,
+  verifiableURI: {
+    type: String,
+    index: true,
+  },
   name: String,
   description: String,
   links: [LinkSchema],
@@ -46,9 +49,25 @@ const LSP3ProfileSchema = new Schema({
   avatar: [AvatarSchema],
   profileImage: [ProfileImageSchema],
   backgroundImage: [BackgroundImageSchema],
+  retry: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const LSP3Profile = mongoose.model("LSP3Profile", LSP3ProfileSchema);
+
+const cacheInvalidator = async () => {
+  setInterval(async () => {
+    console.log("running lsp3 cache invalidator");
+
+    await LSP3Profile.deleteMany({
+      $or: [{ name: "" }, { name: { $exists: false } }],
+    });
+  }, 20 * 1000);
+};
+
+cacheInvalidator();
 
 export const getLSP3Profile = async (verifiableURI) => {
   try {
@@ -67,10 +86,19 @@ export const getLSP3Profile = async (verifiableURI) => {
 
       const result = await ipfsGateway.getIPFSFile(cid);
 
+      let resultObject;
+
+      if (typeof result === "string") {
+        resultObject = JSON.parse(result);
+      } else {
+        resultObject = result;
+      }
+
       const lsp3Profile = new LSP3Profile({
         verifiableURI,
-        ...result.LSP3Profile,
+        ...resultObject.LSP3Profile,
       });
+      console.log(lsp3Profile, result, result.LSP3Profile, resultObject);
       return await lsp3Profile.save();
     } else {
       return existedMetadata;

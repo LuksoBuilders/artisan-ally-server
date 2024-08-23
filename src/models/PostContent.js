@@ -5,7 +5,10 @@ import { IPFSGatewayModule } from "../utils/IPFSGatewayModule.js";
 const Schema = mongoose.Schema;
 
 const PostContentSchema = new Schema({
-  verifiableURI: String,
+  verifiableURI: {
+    type: String,
+    index: true,
+  },
   variant: Number,
   content: String,
 });
@@ -29,6 +32,18 @@ function parseVerifiableURI(verifiableURI) {
     uri: encodedURI ? ethers.utils.toUtf8String("0x" + encodedURI) : "",
   };
 }
+
+const cacheInvalidator = async () => {
+  setInterval(async () => {
+    console.log('running posts cache invalidator')
+
+    await PostContent.deleteMany({
+      $or: [{ content: "" }, { content: { $exists: false } }],
+    });
+  }, 20 * 1000);
+};
+
+cacheInvalidator();
 
 export const getPostContent = async (verifiableURI) => {
   try {
@@ -58,12 +73,18 @@ export const getPostContent = async (verifiableURI) => {
       const ipfsGateway = new IPFSGatewayModule();
       const result = await ipfsGateway.getIPFSFile(cid);
 
-      console.log("PostContent result is: ", result);
+      let resultObject;
+
+      if (typeof result === "string") {
+        resultObject = JSON.parse(result);
+      } else {
+        resultObject = result;
+      }
 
       postContent = new PostContent({
         verifiableURI,
-        variant: result.variant,
-        content: result.content,
+        variant: resultObject.variant,
+        content: resultObject.content,
       });
     }
 

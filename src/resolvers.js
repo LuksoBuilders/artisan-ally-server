@@ -359,6 +359,8 @@ export const resolvers = {
 
         const blockedUsers = ["0xc8acea6b01d10d37ea3704cd406d0ea11000b862"];
 
+        console.log('we have the home posts')
+
         return targetPosts.filter((tgPost) => {
           const userId = tgPost.id.split("-")[0];
 
@@ -369,6 +371,8 @@ export const resolvers = {
 
           return isNotBlockedPost && isNotBlockedUser;
         });
+
+
       } catch (err) {
         console.error(err);
       }
@@ -415,6 +419,9 @@ export const resolvers = {
       return user.followedFeeds.map((feed) => ({ id: feed.id }));
     },
     notifications: async ({ id }, { limit = 10, offset = 0 }) => {
+
+      console.log('getting notifs')
+
       const query = { recipient: id };
 
       const notifications = await Notification.find(query)
@@ -425,10 +432,15 @@ export const resolvers = {
       const hasMore = notifications.length > limit;
       const paginatedNotifications = notifications.slice(0, limit);
 
+      console.log('mid notifs')
+
       const unseenCount = await Notification.countDocuments({
         recipient: id,
         seen: false,
       });
+
+      console.log('got the notif')
+
 
       return {
         notifications: paginatedNotifications.map((notif) => ({
@@ -682,8 +694,17 @@ export const resolvers = {
       return { id: post.creator.id };
     },
     content: async ({ id }, _, { postLoader }) => {
+      const startTime = new Date();
+      const logWithTime = (message) => {
+        const elapsedMs = new Date() - startTime;
+        console.log(`${message} (${elapsedMs}ms after start)`);
+      };
+
+      //logWithTime('start ofgetting the post content')
       const post = await postLoader.load(id);
+      //logWithTime('post indexed data loaded')
       const postContent = await getPostContent(post.content);
+      //logWithTime('post content loaded')
       return postContent;
     },
     postType: async ({ id }, _, { postLoader }) => {

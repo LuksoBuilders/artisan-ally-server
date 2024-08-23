@@ -249,8 +249,6 @@ export const getBotBidsByIds = async (ids) => {
     },
   });
 
-  console.log(botBids);
-
   // Create a map of fellowship data by id
   const botBidsMap = {};
   botBids.forEach((botBid) => {

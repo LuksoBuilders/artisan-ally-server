@@ -6,7 +6,7 @@ const NotificationSchema = new mongoose.Schema(
     alertId: { type: String },
     recipient: { type: String, required: true, lowercase: true, index: true },
     payload: { type: [String], required: true },
-    seen: { type: Boolean, default: false },
+    seen: { type: Boolean, default: false, index: true},
   },
   { timestamps: true }
 );
