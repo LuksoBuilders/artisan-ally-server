@@ -136,9 +136,9 @@ export class NotificationService {
       type: alert.type,
       recipient: alert.recipient.id,
       payload: alert.payload,
-      createdAt: new Date(Number(alert.createdAt) *(1000))
+      createdAt: new Date(Number(alert.createdAt) * 1000),
     };
-    
+
     await this.processNotification(notificationData);
   }
 

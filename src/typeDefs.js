@@ -132,7 +132,11 @@ export const typeDefs = `#graphql
       steloBalance: String!
       bid: Bid
       feed: Feed
-      followedFeeds: [Feed!]!
+      followings: [User!]!
+      followingCount: String!
+      followers: [User!]!
+      followerCount: String!
+
       pushSubscription: PushSubscription
       notifications(limit: Int, offset: Int): PaginatedNotifications!
       flagged: Boolean!
@@ -227,8 +231,6 @@ export const typeDefs = `#graphql
       owner: User!
       posts: [Post!]!
       postCount: String!
-      followers: [User!]!
-      followerCount: String!
     }
 
     type PostContent {

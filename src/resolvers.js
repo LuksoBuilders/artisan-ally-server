@@ -194,6 +194,7 @@ export const resolvers = {
 
     rockStars: async () => {
       try {
+        console.log("start of the query");
         const targetUsers = (
           await request({
             url: GRAPHQL_SERVER_ADDRESS,
@@ -206,6 +207,8 @@ export const resolvers = {
             `,
           })
         ).users;
+
+        console.log("end of the query");
 
         return targetUsers;
       } catch (err) {
@@ -334,34 +337,97 @@ export const resolvers = {
 
     homePagePosts: async (_, { limit, offset, userAddress }) => {
       try {
-        const targetPosts = (
-          await request({
-            url: GRAPHQL_SERVER_ADDRESS,
-            document: gql`
-              query posts {
-                posts(
-                  where: { isDeleted: false, referencePost: null }
-                  orderBy: createdAt
-                  orderDirection: desc
-                ) {
-                  id
-                }
-              }
-            `,
-            variables: {
-              owner: userAddress,
-            },
-          })
-        ).posts;
+        let targetPosts;
 
+        if (userAddress) {
+          const user = (
+            await request({
+              url: GRAPHQL_SERVER_ADDRESS,
+              document: gql`
+                query user($userId: ID!) {
+                  user(id: $userId) {
+                    id
+                    followings {
+                      id
+                    }
+                  }
+                }
+              `,
+              variables: {
+                userId: userAddress,
+              },
+            })
+          ).user;
+
+          console.log(user);
+
+          targetPosts = (
+            await request({
+              url: GRAPHQL_SERVER_ADDRESS,
+              document: gql`
+                query posts($creators: [String!]!) {
+                  posts(
+                    where: {
+                      or: [
+                        {
+                          creator_in: $creators
+                          isDeleted: false
+                          referencePost: null
+                        }
+                        {
+                          isStarred: true
+                          isDeleted: false
+                          referencePost: null
+                        }
+                      ]
+                    }
+                    orderBy: createdAt
+                    orderDirection: desc
+                  ) {
+                    id
+                  }
+                }
+              `,
+              variables: {
+                owner: userAddress,
+                creators: [
+                  userAddress,
+                  ...user.followings.map((follower) => follower.id),
+                ],
+              },
+            })
+          ).posts;
+        } else {
+          targetPosts = (
+            await request({
+              url: GRAPHQL_SERVER_ADDRESS,
+              document: gql`
+                query posts {
+                  posts(
+                    where: {
+                      isStarred: true
+                      isDeleted: false
+                      referencePost: null
+                    }
+                    orderBy: createdAt
+                    orderDirection: desc
+                  ) {
+                    id
+                  }
+                }
+              `,
+              variables: {
+                owner: userAddress,
+              },
+            })
+          ).posts;
+        }
         const blockedPosts = [
           "0xc8acea6b01d10d37ea3704cd406d0ea11000b862-0x0000000000000000000000000000000000000000000000000000000000000000",
           "0xc8acea6b01d10d37ea3704cd406d0ea11000b862-0x0000000000000000000000000000000000000000000000000000000000000001",
         ];
 
         const blockedUsers = ["0xc8acea6b01d10d37ea3704cd406d0ea11000b862"];
-
-        console.log("we have the home posts");
 
         return targetPosts.filter((tgPost) => {
           const userId = tgPost.id.split("-")[0];
@@ -414,9 +480,21 @@ export const resolvers = {
       const user = await userLoader.load(id);
       return user.feed ? { id: user.feed.id } : null;
     },
-    followedFeeds: async ({ id }, _, { userLoader }) => {
+    followers: async ({ id }, _, { userLoader }) => {
       const user = await userLoader.load(id);
-      return user.followedFeeds.map((feed) => ({ id: feed.id }));
+      return user.followers;
+    },
+    followerCount: async ({ id }, _, { userLoader }) => {
+      const user = await userLoader.load(id);
+      return user.followerCount;
+    },
+    followings: async ({ id }, _, { userLoader }) => {
+      const user = await userLoader.load(id);
+      return user.followings;
+    },
+    followingCount: async ({ id }, _, { userLoader }) => {
+      const user = await userLoader.load(id);
+      return user.followingCount;
     },
     notifications: async ({ id }, { limit = 10, offset = 0 }) => {
       console.log("getting notifs");
@@ -676,14 +754,6 @@ export const resolvers = {
     postCount: async ({ id }, _, { feedLoader }) => {
       const feed = await feedLoader.load(id);
       return feed.postCount.toString();
-    },
-    followers: async ({ id }, _, { feedLoader }) => {
-      const feed = await feedLoader.load(id);
-      return feed.followers.map((follower) => ({ id: follower.id }));
-    },
-    followerCount: async ({ id }, _, { feedLoader }) => {
-      const feed = await feedLoader.load(id);
-      return feed.followerCount.toString();
     },
   },
 

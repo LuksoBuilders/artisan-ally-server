@@ -180,9 +180,14 @@ export const getUsersByIds = async (ids) => {
           feed {
             id
           }
-          followedFeeds {
+          followers {
             id
           }
+          followingCount
+          followings {
+            id
+          }
+          followerCount
         }
       }
     `,
@@ -273,10 +278,6 @@ export const getFeedByIds = async (ids) => {
             id
           }
           postCount
-          followers {
-            id
-          }
-          followerCount
         }
       }
     `,
