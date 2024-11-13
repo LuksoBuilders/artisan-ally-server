@@ -69,8 +69,11 @@ export const getPostContent = async (verifiableURI) => {
         content: "",
       });
     } else {
-      const cid = uri.replace("ipfs://", "");
+      let cid = uri.replace("ipfs://", "");
       const ipfsGateway = new IPFSGatewayModule();
+      if (cid.includes("/ipfs/")) {
+        cid = cid.split("/ipfs/").pop();
+      }
       const result = await ipfsGateway.getIPFSFile(cid);
 
       let resultObject;

@@ -80,9 +80,14 @@ export const getLSP3Profile = async (verifiableURI) => {
     if (!existedMetadata) {
       const { decodedUrl } = parseVerifiableURI(verifiableURI);
 
-      const cid = decodedUrl.replace("ipfs://", "");
+      let cid = decodedUrl.replace("ipfs://", "");
+      if (cid.includes("/ipfs/")) {
+        cid = cid.split("/ipfs/").pop();
+      }
 
       const ipfsGateway = new IPFSGatewayModule();
+
+      console.log("cid ============", cid);
 
       const result = await ipfsGateway.getIPFSFile(cid);
 
